@@ -82,15 +82,29 @@ char	*get_path_command(char	*command, char **envp)
 	return (command_path);
 }
 
-void	parse_cmds(int argc, char **argv, t_pipex *pipex)
+int	file_open_init(char **argv)
 {
-	int	i;
+	int	old_wr_pipe;
 
-	pipex->cmds = NULL;
-	while (argv)
+	old_wr_pipe = open(argv[1], O_RDONLY);
+	if (old_wr_pipe < 0)
 	{
-		code
+		ft_dprintf(2, "pipex: %s: %s", argv[1], strerror(errno));
+		old_wr_pipe = open("/dev/null", O_RDONLY);
+		if (old_wr_pipe < 0)
+		{
+			ft_dprintf(2, "pipex: %s: %s", "/dev/null", strerror(errno));
+			exit(WEXITSTATUS(old_wr_pipe));
+		}
+		return (old_wr_pipe);
 	}
+	return (old_wr_pipe);
+}
+void	close_all(int fd1, int fd2, int fd3)
+{
+	close(fd1);
+	close(fd2);
+	close(fd3);
 }
 
 // Alloc need to be in the parent and not the child
@@ -99,59 +113,40 @@ int	main(int argc, char **argv, char **envp)
 	pid_t	childs[1024];
 	int		pipfd[2];
 	int		old_wr_pipe;
-	int		child_i;
 	int		argv_i;
 	char	**cmd_args;
 	char	*cmd;
-	int		go_to_last;
 	int		last_err;
 
-	child_i = 0;
 	last_err = 0;
-	go_to_last = 0;
-	old_wr_pipe = open(argv[1], O_RDONLY);
-	if (old_wr_pipe < 0)
-	{
-		ft_dprintf(2, "pipex: %s: %s", argv[1], strerror(errno));
-		old_wr_pipe = open("/dev/null", O_RDONLY);
-		go_to_last = 1;
-		if (old_wr_pipe < 0)
-		{
-			ft_dprintf(2, "pipex: %s: %s", "/dev/null", strerror(errno));
-			exit(WEXITSTATUS(old_wr_pipe));
-		}
-	}
+	old_wr_pipe = file_open_init(argv);
 	argv_i = 2;
-	if (go_to_last)
+	if (old_wr_pipe < 0)
 		argv_i = argc - 2;
 	while (argv_i < argc - 1)
 	{
 		pipe(pipfd);
 		cmd_args = ft_split(argv[argv_i], ' ');
 		cmd = get_path_command(cmd_args[0], envp);
-		childs[child_i] = fork();
-		if (childs[child_i] == 0)
+		childs[argv_i] = fork();
+		if (childs[argv_i] == 0)
 		{
 			dup2(old_wr_pipe, STDIN_FILENO);
 			dup2(pipfd[WR], STDOUT_FILENO);
 			if (argv_i == argc - 2)
 				dup2(open(argv[argc - 1], O_CREAT | O_WRONLY | O_TRUNC, 0644), STDOUT_FILENO);
-			close(pipfd[WR]);
-			close(pipfd[RD]);
-			close(old_wr_pipe);
+			close_all(pipfd[RD], pipfd[WR], old_wr_pipe);
 			execve(cmd, cmd_args, envp);
 			ft_dprintf(2, "pipex: %s: %s", cmd_args[0], strerror(errno));
 			exit(127);
 		}
-		else if (childs[child_i] < 0)
+		else if (childs[argv_i] < 0)
 		{
 			ft_dprintf(2, "pipex: fork: %s", strerror(errno));
 			clear_split(cmd_args);
 			free(cmd);
-			close(old_wr_pipe);
-			close(pipfd[RD]);
-			close(pipfd[WR]);
-			exit(WEXITSTATUS(childs[child_i]));
+			close_all(pipfd[RD], pipfd[WR], old_wr_pipe);
+			exit(WEXITSTATUS(childs[argv_i]));
 		}
 		clear_split(cmd_args);
 		free(cmd);
@@ -159,15 +154,14 @@ int	main(int argc, char **argv, char **envp)
 		old_wr_pipe = pipfd[RD];
 		close(pipfd[WR]);
 		argv_i++;
-		child_i++;
 	}
 	close(old_wr_pipe);
-	while (child_i >= 0)
+	while (argv_i >= 2)
 	{
-		if (child_i-- == argv_i - 2)
-			waitpid(childs[child_i], &last_err, 0);
+		if (argv_i-- == argc - 1)
+			waitpid(childs[argv_i], &last_err, 0);
 		else
-			waitpid(childs[child_i], NULL, 0);
+			waitpid(childs[argv_i], NULL, 0);
 	}
 	exit(WEXITSTATUS(last_err));
 }
