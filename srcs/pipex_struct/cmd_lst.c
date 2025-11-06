@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/05 19:08:37 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/06 09:20:04 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/06 13:38:23 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ t_cmd_lst	*ft_cmdlst_new(char	*cmd, char	**argv)
 {
 	t_cmd_lst	*new;
 
-	new = malloc(sizeof(t_list));
+	new = malloc(sizeof(t_cmd_lst));
 	if (new == NULL)
 		return (new);
 	new->cmd_path = cmd;
@@ -65,11 +65,12 @@ void	clear_cmds(t_cmd_lst **lst)
 	t_cmd_lst	*tmp;
 
 	current = *lst;
-	while (current && current->next)
+	while (current)
 	{
 		tmp = current->next;
 		clear_split(current->cmd_argv);
 		free(current->cmd_path);
+		free(current);
 		current = tmp;
 	}
 	*lst = NULL;

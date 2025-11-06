@@ -12,12 +12,11 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <wait.h>
 #include "../includes/ft_printf.h"
 #include "../includes/pipex.h"
-#include "../includes/libft.h"
 
 // write nothing if error -> create file anyway
 // ls do ls in current folder without considering the in file
@@ -70,69 +69,14 @@ void	wait_all(int argv_i, int argc, int *childs, int *last_err)
 {
 	while (argv_i >= 2)
 	{
-		if (argv_i-- == argc - 1)
+		if (argv_i-- == argc - 3)
 			waitpid(childs[argv_i], last_err, 0);
 		else
 			waitpid(childs[argv_i], NULL, 0);
 	}
 }
 
-// Alloc need to be in the parent and not the child
-// int	main(int argc, char **argv, char **envp)
-// {
-// 	pid_t	childs[1024];
-// 	int		pipfd[2];
-// 	int		old_wr_pipe;
-// 	int		argv_i;
-// 	char	**cmd_args;
-// 	char	*cmd;
-// 	int		last_err;
-
-// 	last_err = 0;
-// 	old_wr_pipe = file_open_init(argv);
-// 	argv_i = 2;
-// 	// PAS BON CAR OPEN REUSSI AVEC /dev/null
-// 	if (old_wr_pipe < 0)
-// 		argv_i = argc - 2;
-// 	while (argv_i < argc - 1)
-// 	{
-// 		pipe(pipfd);
-// 		cmd_args = ft_split(argv[argv_i], ' ');
-// 		cmd = get_path_command(cmd_args[0], envp);
-// 		childs[argv_i] = fork();
-// 		if (childs[argv_i] == 0)
-// 		{
-// 			dup2(old_wr_pipe, STDIN_FILENO);
-// 			if (argv_i == argc - 2)
-// 				// leak du open il faut une var temp
-// 				dup2(open(argv[argc - 1], O_CREAT | O_WRONLY | O_TRUNC, 0644), STDOUT_FILENO);
-// 			dup2(pipfd[WR], STDOUT_FILENO);
-// 			close_all(pipfd[RD], pipfd[WR], old_wr_pipe);
-// 			execve(cmd, cmd_args, envp);
-// 			ft_dprintf(2, "pipex: %s: %s", cmd_args[0], strerror(errno));
-// 			exit(127);
-// 		}
-// 		else if (childs[argv_i] < 0)
-// 		{
-// 			ft_dprintf(2, "pipex: fork: %s", strerror(errno));
-// 			clear_split(cmd_args);
-// 			free(cmd);
-// 			close_all(pipfd[RD], pipfd[WR], old_wr_pipe);
-// 			exit(WEXITSTATUS(childs[argv_i]));
-// 		}
-// 		clear_split(cmd_args);
-// 		free(cmd);
-// 		close(old_wr_pipe);
-// 		old_wr_pipe = pipfd[RD];
-// 		close(pipfd[WR]);
-// 		argv_i++;
-// 	}
-// 	close(old_wr_pipe);
-// 	wait_all(argv_i, argc, childs, &last_err);
-// 	exit(WEXITSTATUS(last_err));
-// }
-
-// TODO: SEGV -> WHEEEEERE
+// TODO: split the function to norm
 int	main(int argc, char **argv, char **envp)
 {
 	pid_t		childs[1024];
@@ -143,7 +87,7 @@ int	main(int argc, char **argv, char **envp)
 
 	pipex = parsing(argv, argc, envp);
 	if (pipex == NULL)
-		exit(1); // TODO: trouver le bon exit code malloc failed
+		exit(WEXITSTATUS(52));
 	last_err = 0;
 	child_i = 0;
 	current_cmd = pipex->cmds;
@@ -156,15 +100,15 @@ int	main(int argc, char **argv, char **envp)
 		if (childs[child_i] == 0)
 		{
 			dup2(pipex->old_fd, STDIN_FILENO);
-			if (pipex->skip_all_pipe)
-				dup2(pipex->end_fd, STDOUT_FILENO);
 			dup2(pipex->pipfds[WR], STDOUT_FILENO);
+			if (pipex->skip_all_pipe || current_cmd->next == NULL)
+				dup2(pipex->end_fd, STDOUT_FILENO);
 			close(pipex->pipfds[WR]);
 			close(pipex->pipfds[RD]);
 			close(pipex->old_fd);
 			close(pipex->end_fd);
 			execve(current_cmd->cmd_path, current_cmd->cmd_argv, pipex->envp);
-			ft_dprintf(2, "pipex: %s: %s", current_cmd->cmd_argv[0], strerror(errno));
+			ft_dprintf(2, "pipex: %s: %s\n", current_cmd->cmd_path, strerror(errno));
 			exit(127);
 		}
 		else if (childs[child_i] < 0)
