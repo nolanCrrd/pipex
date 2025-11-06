@@ -9,12 +9,15 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/tests/a.out",
-            "args": ["coucou", "grep test", "wc", "test"],
+            "args": ["/Users/correardnolan/Documents/Dev/C/pipex/tests/coucou",
+            "grep test",
+            "wc",
+            "/Users/correardnolan/Documents/Dev/C/pipex/tests/test"],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
             "externalConsole": false,
-            "MIMode": "lldb"
+            "MIMode": "lldb",
         }
 
     ]
