@@ -27,7 +27,7 @@
 // if file = dir send it without open
 
 // top get multiple pipe -> create while and break it if its the parent
-// get the path instead of /usr/bin
+// get the path instead of /usr/b
 
 void	clear_split(char **strs)
 {
