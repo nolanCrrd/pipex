@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 13:44:11 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/12 09:55:50 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/12 10:44:23 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,13 @@
 #include <string.h>
 #include <errno.h>
 
+/**
+ * @brief Create a path top the command
+ * 
+ * @param cmd Command's name (grep, ls, ...)
+ * @param path path where search the executable
+ * @return char* created absolute path
+ */
 char	*cmd_cat(char *cmd, char *path)
 {
 	char	*tmp_free;
@@ -30,6 +37,13 @@ char	*cmd_cat(char *cmd, char *path)
 	return (cmd_line);
 }
 
+/**
+ * @brief Find the correct path top the given command
+ * 
+ * @param command Command where find
+ * @param envp User's environnement variables
+ * @return char* the correct absolute path
+ */
 char	*get_path_command(char	*command, char **envp)
 {
 	char	**path_lst;
@@ -59,6 +73,14 @@ char	*get_path_command(char	*command, char **envp)
 	return (command_path);
 }
 
+/** 
+ * @brief Open the correct input/output file
+ * 
+ * @param pipex Program's datas
+ * @param argv Program's arguments
+ * @param argc Number of arguments
+ * @param to_append boolean if here_doc present in first arg (>> instead of >)
+ */
 void	open_fds(t_pipex *pipex, char **argv, int argc, int to_append)
 {
 	pipex->old_fd = open(argv[1 + to_append], O_RDONLY);
@@ -80,6 +102,11 @@ void	open_fds(t_pipex *pipex, char **argv, int argc, int to_append)
 		ft_dprintf(1, "pipex: %s: %s\n", argv[argc - 1], strerror(errno));
 }
 
+/**
+ * @brief Free all split's datas
+ * 
+ * @param strs split's data to free
+ */
 void	clear_split(char **strs)
 {
 	int	i;

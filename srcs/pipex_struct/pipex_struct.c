@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 15:47:22 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/12 08:43:21 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/12 10:38:00 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,11 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+/**
+ * @brief Delete properly all the pipex structure
+ * 
+ * @param pipex Datas
+ */
 void	pipex_clear(t_pipex *pipex)
 {
 	clear_cmds(&pipex->cmds);

@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/05 19:16:29 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/12 08:57:50 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/12 10:40:27 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,15 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-//TODO: Norm
+/**
+ * @brief Create the command chained list based on program's arguments
+ * 
+ * @param argv Program's arguments
+ * @param argc Number of arguments
+ * @param envp Environnement variables of the user
+ * @param skip_first Boolean (skip first command if input not found)
+ * @return t_cmd_lst* 
+ */
 t_cmd_lst	*get_cmd_lst(char	**argv, int argc, char **envp, int skip_first)
 {
 	t_cmd_lst	*cmds;
@@ -46,7 +54,14 @@ t_cmd_lst	*get_cmd_lst(char	**argv, int argc, char **envp, int skip_first)
 	return (cmds);
 }
 
-// TODO: make >> work -> O_APPEND
+/**
+ * @brief Initiate all important data for the execution
+ * 
+ * @param argv Program's arguments
+ * @param argc Number of arguments
+ * @param envp Environnement variables of the user
+ * @return t_pipex* 
+ */
 t_pipex	*parsing(char **argv, int argc, char **envp)
 {
 	t_pipex	*pipex;

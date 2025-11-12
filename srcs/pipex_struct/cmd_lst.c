@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/05 19:08:37 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/06 15:47:40 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/12 10:38:32 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,11 @@ int	ft_lstcmd_add(t_cmd_lst **lst, char *cmd, char **cmd_argv)
 	return (0);
 }
 
+/**
+ * @brief Clear the chained list of commands
+ * 
+ * @param lst Chained list
+ */
 void	clear_cmds(t_cmd_lst **lst)
 {
 	t_cmd_lst	*current;
@@ -76,6 +81,12 @@ void	clear_cmds(t_cmd_lst **lst)
 	*lst = NULL;
 }
 
+/**
+ * @brief Get the last command to exec
+ * 
+ * @param lst 
+ * @return t_cmd_lst* 
+ */
 t_cmd_lst	*get_last(t_cmd_lst *lst)
 {
 	while (lst && lst->next)

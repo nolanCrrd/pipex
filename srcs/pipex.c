@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 15:30:48 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/12 09:58:52 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/12 10:45:17 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,17 +18,12 @@
 #include "../includes/ft_printf.h"
 #include "../includes/pipex.h"
 
-// write nothing if error -> create file anyway
-// ls do ls in current folder without considering the in file
-
-// if < file -> cat the file
-// if < file command -> command file
-// if < file command > file -> output the command in the file
-// if file = dir send it without open
-
-// top get multiple pipe -> create while and break it if its the parent
-// get the path instead of /usr/bin
-
+/**
+ * @brief prepare the input file of the command chain
+ * 
+ * @param argv program arguments
+ * @return int input file descriptor
+ */
 int	file_open_init(char **argv)
 {
 	int	old_wr_pipe;
@@ -39,15 +34,20 @@ int	file_open_init(char **argv)
 		ft_dprintf(2, "pipex: %s: %s", argv[1], strerror(errno));
 		old_wr_pipe = open("/dev/null", O_RDONLY);
 		if (old_wr_pipe < 0)
-		{
 			ft_dprintf(2, "pipex: %s: %s", "/dev/null", strerror(errno));
-			exit(WEXITSTATUS(old_wr_pipe));
-		}
 		return (old_wr_pipe);
 	}
 	return (old_wr_pipe);
 }
 
+/**
+ * @brief Wait all child process one by one
+ * 
+ * @param child_i number of child
+ * @param argc number of program's args
+ * @param childs all childs's pid_t
+ * @param last_err Address where write the err of last child
+ */
 void	wait_all(int child_i, int argc, int *childs, int *last_err)
 {
 	while (child_i >= 0)
@@ -60,6 +60,12 @@ void	wait_all(int child_i, int argc, int *childs, int *last_err)
 	}
 }
 
+/**
+ * @brief Execute a child process properly
+ * 
+ * @param pipex All important data of the program
+ * @param current_cmd command to exec
+ */
 void	child_exec(t_pipex *pipex, t_cmd_lst *current_cmd)
 {
 	dup2(pipex->old_fd, STDIN_FILENO);
@@ -76,6 +82,13 @@ void	child_exec(t_pipex *pipex, t_cmd_lst *current_cmd)
 	exit(127);
 }
 
+/**
+ * @brief Exec all command of the chain
+ * 
+ * @param pipex Important datas of the program
+ * @param childs childs pid_t list
+ * @return int number of child < 0 if fail
+ */
 int	exec_all(t_pipex *pipex, pid_t childs[1024])
 {
 	t_cmd_lst	*current_cmd;
@@ -118,7 +131,8 @@ int	main(int argc, char **argv, char **envp)
 	last_err = 0;
 	child_i = exec_all(pipex, childs);
 	wait_all(child_i, argc - (ft_strncmp(argv[1], "here_doc",
-		ft_strlen(argv[1])) == 0) - pipex->skip_all_pipe, childs, &last_err);
+				ft_strlen(argv[1])) == 0) - pipex->skip_all_pipe,
+		childs, &last_err);
 	if (child_i < 0)
 		exit(WEXITSTATUS(4));
 	close(pipex->old_fd);
