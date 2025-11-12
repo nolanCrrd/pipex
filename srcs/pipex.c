@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 15:30:48 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/06 17:15:12 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/12 08:41:49 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,16 +29,6 @@
 // top get multiple pipe -> create while and break it if its the parent
 // get the path instead of /usr/bin
 
-void	clear_split(char **strs)
-{
-	int	i;
-
-	i = 0;
-	while (strs[i])
-		free(strs[i++]);
-	free(strs);
-}
-
 int	file_open_init(char **argv)
 {
 	int	old_wr_pipe;
@@ -56,13 +46,6 @@ int	file_open_init(char **argv)
 		return (old_wr_pipe);
 	}
 	return (old_wr_pipe);
-}
-
-void	close_all(int fd1, int fd2, int fd3)
-{
-	close(fd1);
-	close(fd2);
-	close(fd3);
 }
 
 void	wait_all(int argv_i, int argc, int *childs, int *last_err)
@@ -92,32 +75,30 @@ void	child_exec(t_pipex *pipex, t_cmd_lst *current_cmd)
 	exit(127);
 }
 
-// TODO: Norm
 int	exec_all(t_pipex *pipex, pid_t childs[1024])
 {
 	t_cmd_lst	*current_cmd;
 	int			child_i;
 
-	child_i = 0;
+	child_i = -1;
 	current_cmd = pipex->cmds;
 	if (pipex->skip_all_pipe)
 		current_cmd = get_last(pipex->cmds);
 	while (current_cmd != NULL)
 	{
 		pipe(pipex->pipfds);
-		childs[child_i] = fork();
+		childs[++child_i] = fork();
 		if (childs[child_i] == 0)
 			child_exec(pipex, current_cmd);
 		else if (childs[child_i] < 0)
 		{
 			ft_dprintf(2, "pipex: fork: %s", strerror(errno));
 			pipex_clear(pipex);
-			return(childs[child_i]);
+			return (childs[child_i]);
 		}
 		close(pipex->old_fd);
 		pipex->old_fd = pipex->pipfds[RD];
 		close(pipex->pipfds[WR]);
-		child_i++;
 		current_cmd = current_cmd->next;
 	}
 	return (child_i);
@@ -140,7 +121,7 @@ int	main(int argc, char **argv, char **envp)
 	child_i = exec_all(pipex, childs);
 	wait_all(child_i, argc, childs, &last_err);
 	if (child_i < 0)
-		exit(1); //find status code for fork fail
+		exit(WEXITSTATUS(4));
 	close(pipex->old_fd);
 	pipex_clear(pipex);
 	exit(WEXITSTATUS(last_err));

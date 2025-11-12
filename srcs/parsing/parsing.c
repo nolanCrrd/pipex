@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/05 19:16:29 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/06 17:12:03 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/12 08:42:46 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,22 +21,22 @@ t_cmd_lst	*get_cmd_lst(char	**argv, int argc, char **envp)
 {
 	t_cmd_lst	*cmds;
 	char		*current_cmd;
-	char		**current_argv;
+	char		**cu_argv;
 	int			i;
 
 	cmds = NULL;
 	i = 2;
 	while (i < argc - 1)
 	{
-		current_argv = ft_split(argv[i], ' ');
-		if (current_argv != NULL)
+		cu_argv = ft_split(argv[i], ' ');
+		if (cu_argv != NULL)
 		{
-			current_cmd = get_path_command(current_argv[0], envp);
+			current_cmd = get_path_command(cu_argv[0], envp);
 			if (current_cmd == NULL)
-				ft_dprintf(2, "pipex: command not found: %s\n", current_argv[0]);
-			if (ft_lstcmd_add(&cmds, current_cmd, current_argv))
+				ft_dprintf(2, "pipex: command not found: %s\n", cu_argv[0]);
+			if (ft_lstcmd_add(&cmds, current_cmd, cu_argv))
 			{
-				clear_split(current_argv);
+				clear_split(cu_argv);
 				clear_cmds(&cmds);
 				return (NULL);
 			}
