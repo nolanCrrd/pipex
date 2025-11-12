@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 13:44:11 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/12 09:00:21 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/12 09:03:08 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,9 +71,11 @@ void	open_fds(t_pipex *pipex, char **argv, int argc, int to_append)
 			ft_dprintf(1, "pipex: /dev/null: %s\n", strerror(errno));
 	}
 	if (to_append > 0)
-		pipex->end_fd = open(argv[argc - 1], O_CREAT | O_WRONLY | O_APPEND, 0644);
+		pipex->end_fd = open(argv[argc - 1], O_CREAT | O_WRONLY | O_APPEND,
+				0644);
 	else
-		pipex->end_fd = open(argv[argc - 1], O_CREAT | O_WRONLY | O_TRUNC, 0644);
+		pipex->end_fd = open(argv[argc - 1], O_CREAT | O_WRONLY | O_TRUNC,
+				0644);
 	if (pipex->end_fd < -1)
 		ft_dprintf(1, "pipex: %s: %s\n", argv[argc - 1], strerror(errno));
 }
