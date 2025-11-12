@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 15:30:48 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/12 12:10:55 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/12 12:25:12 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,6 +125,8 @@ int	main(int argc, char **argv, char **envp)
 	int			child_i;
 	int			last_err;
 
+	if (argc <= 3)
+		exit(1);
 	pipex = parsing(argv, argc, envp);
 	if (pipex == NULL)
 		exit(WEXITSTATUS(127));
