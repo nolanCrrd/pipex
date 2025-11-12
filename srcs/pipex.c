@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 15:30:48 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/12 11:00:13 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/12 12:10:55 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,7 +131,8 @@ int	main(int argc, char **argv, char **envp)
 	last_err = 0;
 	child_i = exec_all(pipex, childs);
 	wait_all(child_i, argc - (ft_strncmp(argv[1], "here_doc",
-			ft_strlen(argv[1])) == 0) - pipex->skip_all_pipe, childs, &last_err);
+				ft_strlen(argv[1])) == 0) - pipex->skip_all_pipe, childs,
+		&last_err);
 	if (child_i < 0)
 		exit(WEXITSTATUS(4));
 	close(pipex->old_fd);
