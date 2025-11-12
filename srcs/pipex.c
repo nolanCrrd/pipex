@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 15:30:48 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/12 09:32:40 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/12 09:53:00 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ void	wait_all(int child_i, int argc, int *childs, int *last_err)
 {
 	while (child_i >= 0)
 	{
-		if (child_i == argc - 3)
+		if (child_i == argc - 4)
 			waitpid(childs[child_i], last_err, 0);
 		else
 			waitpid(childs[child_i], NULL, 0);
@@ -111,15 +111,14 @@ int	main(int argc, char **argv, char **envp)
 	t_pipex		*pipex;
 	int			child_i;
 	int			last_err;
-	t_cmd_lst	*current_cmd;
 
 	pipex = parsing(argv, argc, envp);
 	if (pipex == NULL)
 		exit(WEXITSTATUS(127));
 	last_err = 0;
-	current_cmd = pipex->cmds;
 	child_i = exec_all(pipex, childs);
-	wait_all(child_i, argc, childs, &last_err);
+	wait_all(child_i, argc - (ft_strncmp(argv[1], "here_doc",
+		ft_strlen(argv[1])) == 0), childs, &last_err);
 	if (child_i < 0)
 		exit(WEXITSTATUS(4));
 	close(pipex->old_fd);
