@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 13:44:11 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/12 09:03:08 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/12 09:55:50 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ void	open_fds(t_pipex *pipex, char **argv, int argc, int to_append)
 	if (pipex->old_fd <= -1)
 	{
 		ft_dprintf(1, "pipex: %s: %s\n", argv[1], strerror(errno));
-		pipex->skip_all_pipe = 0;
+		pipex->skip_all_pipe = 1;
 		pipex->old_fd = open("/dev/null", O_RDONLY);
 		if (pipex->old_fd < -1)
 			ft_dprintf(1, "pipex: /dev/null: %s\n", strerror(errno));

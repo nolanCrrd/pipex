@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 15:30:48 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/12 09:53:00 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/12 09:58:52 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ void	child_exec(t_pipex *pipex, t_cmd_lst *current_cmd)
 {
 	dup2(pipex->old_fd, STDIN_FILENO);
 	dup2(pipex->pipfds[WR], STDOUT_FILENO);
-	if (pipex->skip_all_pipe || current_cmd->next == NULL)
+	if (current_cmd->next == NULL)
 		dup2(pipex->end_fd, STDOUT_FILENO);
 	close(pipex->pipfds[WR]);
 	close(pipex->pipfds[RD]);
@@ -84,7 +84,7 @@ int	exec_all(t_pipex *pipex, pid_t childs[1024])
 	child_i = -1;
 	current_cmd = pipex->cmds;
 	if (pipex->skip_all_pipe)
-		current_cmd = get_last(pipex->cmds);
+		current_cmd = current_cmd->next;
 	while (current_cmd != NULL)
 	{
 		pipe(pipex->pipfds);
@@ -118,7 +118,7 @@ int	main(int argc, char **argv, char **envp)
 	last_err = 0;
 	child_i = exec_all(pipex, childs);
 	wait_all(child_i, argc - (ft_strncmp(argv[1], "here_doc",
-		ft_strlen(argv[1])) == 0), childs, &last_err);
+		ft_strlen(argv[1])) == 0) - pipex->skip_all_pipe, childs, &last_err);
 	if (child_i < 0)
 		exit(WEXITSTATUS(4));
 	close(pipex->old_fd);
