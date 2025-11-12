@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 15:30:48 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/12 08:41:49 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/12 08:50:29 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,7 @@ void	child_exec(t_pipex *pipex, t_cmd_lst *current_cmd)
 	close(pipex->pipfds[RD]);
 	close(pipex->old_fd);
 	close(pipex->end_fd);
-	if (current_cmd != NULL)
+	if (current_cmd->cmd_path != NULL)
 		execve(current_cmd->cmd_path, current_cmd->cmd_argv, pipex->envp);
 	pipex_clear(pipex);
 	exit(127);
@@ -104,7 +104,6 @@ int	exec_all(t_pipex *pipex, pid_t childs[1024])
 	return (child_i);
 }
 
-// TODO: split the function to norm
 int	main(int argc, char **argv, char **envp)
 {
 	pid_t		childs[1024];
