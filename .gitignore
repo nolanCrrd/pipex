@@ -57,3 +57,5 @@ dkms.conf
 # personal add
 *.pdf
 .DS_Store
+pipex
+out

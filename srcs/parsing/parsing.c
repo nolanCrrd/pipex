@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/05 19:16:29 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/12 10:40:27 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/12 11:10:04 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,7 @@ t_cmd_lst	*get_cmd_lst(char	**argv, int argc, char **envp, int skip_first)
  * @param argv Program's arguments
  * @param argc Number of arguments
  * @param envp Environnement variables of the user
- * @return t_pipex* 
+ * @return t_pipex*
  */
 t_pipex	*parsing(char **argv, int argc, char **envp)
 {
