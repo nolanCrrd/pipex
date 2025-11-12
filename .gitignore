@@ -56,3 +56,4 @@ dkms.conf
 
 # personal add
 *.pdf
+.DS_Store
