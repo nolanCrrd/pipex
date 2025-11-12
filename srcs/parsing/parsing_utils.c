@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 13:44:11 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/06 14:50:36 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/06 16:28:44 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,10 +59,13 @@ char	*get_path_command(char	*command, char **envp)
 	return (command_path);
 }
 
-void	open_fds(t_pipex *pipex, char **argv, int argc)
+void	open_fds(t_pipex *pipex, char **argv, int argc, int cmd_not_found)
 {
-	pipex->old_fd = open(argv[1], O_RDONLY);
-	if (pipex->old_fd < -1)
+	if (cmd_not_found)
+		pipex->old_fd = open("/dev/null", O_RDONLY);
+	else
+		pipex->old_fd = open(argv[1], O_RDONLY);
+	if (pipex->old_fd <= -1)
 	{
 		ft_dprintf(1, "pipex: %s: %s\n", argv[1], strerror(errno));
 		pipex->skip_all_pipe = 0;

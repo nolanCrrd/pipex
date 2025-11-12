@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/04 14:53:40 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/05 10:23:30orrear         ###   ########.fr       */
+/*   Created: 2025/11/06 15:30:48 by ncorrear          #+#    #+#             */
+/*   Updated: 2025/11/06 17:15:12 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,53 @@ void	wait_all(int argv_i, int argc, int *childs, int *last_err)
 	}
 }
 
+void	child_exec(t_pipex *pipex, t_cmd_lst *current_cmd)
+{
+	dup2(pipex->old_fd, STDIN_FILENO);
+	dup2(pipex->pipfds[WR], STDOUT_FILENO);
+	if (pipex->skip_all_pipe || current_cmd->next == NULL)
+		dup2(pipex->end_fd, STDOUT_FILENO);
+	close(pipex->pipfds[WR]);
+	close(pipex->pipfds[RD]);
+	close(pipex->old_fd);
+	close(pipex->end_fd);
+	if (current_cmd != NULL)
+		execve(current_cmd->cmd_path, current_cmd->cmd_argv, pipex->envp);
+	pipex_clear(pipex);
+	exit(127);
+}
+
+// TODO: Norm
+int	exec_all(t_pipex *pipex, pid_t childs[1024])
+{
+	t_cmd_lst	*current_cmd;
+	int			child_i;
+
+	child_i = 0;
+	current_cmd = pipex->cmds;
+	if (pipex->skip_all_pipe)
+		current_cmd = get_last(pipex->cmds);
+	while (current_cmd != NULL)
+	{
+		pipe(pipex->pipfds);
+		childs[child_i] = fork();
+		if (childs[child_i] == 0)
+			child_exec(pipex, current_cmd);
+		else if (childs[child_i] < 0)
+		{
+			ft_dprintf(2, "pipex: fork: %s", strerror(errno));
+			pipex_clear(pipex);
+			return(childs[child_i]);
+		}
+		close(pipex->old_fd);
+		pipex->old_fd = pipex->pipfds[RD];
+		close(pipex->pipfds[WR]);
+		child_i++;
+		current_cmd = current_cmd->next;
+	}
+	return (child_i);
+}
+
 // TODO: split the function to norm
 int	main(int argc, char **argv, char **envp)
 {
@@ -87,44 +134,14 @@ int	main(int argc, char **argv, char **envp)
 
 	pipex = parsing(argv, argc, envp);
 	if (pipex == NULL)
-		exit(WEXITSTATUS(52));
+		exit(WEXITSTATUS(127));
 	last_err = 0;
-	child_i = 0;
 	current_cmd = pipex->cmds;
-	if (pipex->skip_all_pipe)
-		current_cmd = get_last(pipex->cmds);
-	while (current_cmd != NULL)
-	{
-		pipe(pipex->pipfds);
-		childs[child_i] = fork();
-		if (childs[child_i] == 0)
-		{
-			dup2(pipex->old_fd, STDIN_FILENO);
-			dup2(pipex->pipfds[WR], STDOUT_FILENO);
-			if (pipex->skip_all_pipe || current_cmd->next == NULL)
-				dup2(pipex->end_fd, STDOUT_FILENO);
-			close(pipex->pipfds[WR]);
-			close(pipex->pipfds[RD]);
-			close(pipex->old_fd);
-			close(pipex->end_fd);
-			execve(current_cmd->cmd_path, current_cmd->cmd_argv, pipex->envp);
-			ft_dprintf(2, "pipex: %s: %s\n", current_cmd->cmd_path, strerror(errno));
-			exit(127);
-		}
-		else if (childs[child_i] < 0)
-		{
-			ft_dprintf(2, "pipex: fork: %s", strerror(errno));
-			pipex_clear(pipex);
-			exit(WEXITSTATUS(childs[child_i]));
-		}
-		close(pipex->old_fd);
-		pipex->old_fd = pipex->pipfds[RD];
-		close(pipex->pipfds[WR]);
-		child_i++;
-		current_cmd = current_cmd->next;
-	}
+	child_i = exec_all(pipex, childs);
+	wait_all(child_i, argc, childs, &last_err);
+	if (child_i < 0)
+		exit(1); //find status code for fork fail
 	close(pipex->old_fd);
 	pipex_clear(pipex);
-	wait_all(child_i, argc, childs, &last_err);
 	exit(WEXITSTATUS(last_err));
 }

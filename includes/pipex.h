@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/04 15:02:22 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/06 13:45:48 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/06 15:40:46 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ void	clear_split(char **strs);
 // parsing
 char	*cmd_cat(char *cmd, char *path);
 char	*get_path_command(char	*command, char **envp);
-void	open_fds(t_pipex *pipex, char **argv, int argc);
+void	open_fds(t_pipex *pipex, char **argv, int argc, int cmd_not_found);
 t_pipex	*parsing(char **argv, int argc, char **envp);
 
 // pipex struct

@@ -6,15 +6,17 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/05 19:16:29 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/06 14:58:17 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/06 17:12:03 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/pipex.h"
+#include "../../includes/ft_printf.h"
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
 
+//TODO: Norm
 t_cmd_lst	*get_cmd_lst(char	**argv, int argc, char **envp)
 {
 	t_cmd_lst	*cmds;
@@ -30,7 +32,9 @@ t_cmd_lst	*get_cmd_lst(char	**argv, int argc, char **envp)
 		if (current_argv != NULL)
 		{
 			current_cmd = get_path_command(current_argv[0], envp);
-			if (current_cmd == NULL || ft_lstcmd_add(&cmds, current_cmd, current_argv))
+			if (current_cmd == NULL)
+				ft_dprintf(2, "pipex: command not found: %s\n", current_argv[0]);
+			if (ft_lstcmd_add(&cmds, current_cmd, current_argv))
 			{
 				clear_split(current_argv);
 				clear_cmds(&cmds);
@@ -52,7 +56,7 @@ t_pipex	*parsing(char **argv, int argc, char **envp)
 		return (NULL);
 	pipex->cmds = get_cmd_lst(argv, argc, envp);
 	pipex->skip_all_pipe = 0;
-	open_fds(pipex, argv, argc);
+	open_fds(pipex, argv, argc, 0);
 	if (pipex->cmds == NULL || pipex->old_fd < 0 || pipex->end_fd < 0)
 	{
 		if (pipex->end_fd > 0)

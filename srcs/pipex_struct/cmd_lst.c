@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/05 19:08:37 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/06 13:38:23 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/06 15:47:40 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,14 +81,4 @@ t_cmd_lst	*get_last(t_cmd_lst *lst)
 	while (lst && lst->next)
 		lst = lst->next;
 	return (lst);
-}
-
-void	pipex_clear(t_pipex *pipex)
-{
-	clear_cmds(&pipex->cmds);
-	close(pipex->end_fd);
-	close(pipex->old_fd);
-	close(pipex->pipfds[0]);
-	close(pipex->pipfds[1]);
-	free(pipex);
 }
