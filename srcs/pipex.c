@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 15:30:48 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/12 08:50:29 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/12 09:32:40 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,14 +48,15 @@ int	file_open_init(char **argv)
 	return (old_wr_pipe);
 }
 
-void	wait_all(int argv_i, int argc, int *childs, int *last_err)
+void	wait_all(int child_i, int argc, int *childs, int *last_err)
 {
-	while (argv_i >= 2)
+	while (child_i >= 0)
 	{
-		if (argv_i-- == argc - 3)
-			waitpid(childs[argv_i], last_err, 0);
+		if (child_i == argc - 3)
+			waitpid(childs[child_i], last_err, 0);
 		else
-			waitpid(childs[argv_i], NULL, 0);
+			waitpid(childs[child_i], NULL, 0);
+		child_i--;
 	}
 }
 
