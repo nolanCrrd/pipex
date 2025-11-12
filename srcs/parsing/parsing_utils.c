@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/06 13:44:11 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/12 08:43:11 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/12 09:00:21 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,12 +59,9 @@ char	*get_path_command(char	*command, char **envp)
 	return (command_path);
 }
 
-void	open_fds(t_pipex *pipex, char **argv, int argc, int cmd_not_found)
+void	open_fds(t_pipex *pipex, char **argv, int argc, int to_append)
 {
-	if (cmd_not_found)
-		pipex->old_fd = open("/dev/null", O_RDONLY);
-	else
-		pipex->old_fd = open(argv[1], O_RDONLY);
+	pipex->old_fd = open(argv[1 + to_append], O_RDONLY);
 	if (pipex->old_fd <= -1)
 	{
 		ft_dprintf(1, "pipex: %s: %s\n", argv[1], strerror(errno));
@@ -73,7 +70,10 @@ void	open_fds(t_pipex *pipex, char **argv, int argc, int cmd_not_found)
 		if (pipex->old_fd < -1)
 			ft_dprintf(1, "pipex: /dev/null: %s\n", strerror(errno));
 	}
-	pipex->end_fd = open(argv[argc - 1], O_CREAT | O_WRONLY | O_TRUNC, 0644);
+	if (to_append > 0)
+		pipex->end_fd = open(argv[argc - 1], O_CREAT | O_WRONLY | O_APPEND, 0644);
+	else
+		pipex->end_fd = open(argv[argc - 1], O_CREAT | O_WRONLY | O_TRUNC, 0644);
 	if (pipex->end_fd < -1)
 		ft_dprintf(1, "pipex: %s: %s\n", argv[argc - 1], strerror(errno));
 }

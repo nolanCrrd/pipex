@@ -6,7 +6,7 @@
 /*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/05 19:16:29 by ncorrear          #+#    #+#             */
-/*   Updated: 2025/11/12 08:42:46 by ncorrear         ###   ########.fr       */
+/*   Updated: 2025/11/12 08:57:50 by ncorrear         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 #include <unistd.h>
 
 //TODO: Norm
-t_cmd_lst	*get_cmd_lst(char	**argv, int argc, char **envp)
+t_cmd_lst	*get_cmd_lst(char	**argv, int argc, char **envp, int skip_first)
 {
 	t_cmd_lst	*cmds;
 	char		*current_cmd;
@@ -25,7 +25,7 @@ t_cmd_lst	*get_cmd_lst(char	**argv, int argc, char **envp)
 	int			i;
 
 	cmds = NULL;
-	i = 2;
+	i = 2 + skip_first;
 	while (i < argc - 1)
 	{
 		cu_argv = ft_split(argv[i], ' ');
@@ -50,13 +50,15 @@ t_cmd_lst	*get_cmd_lst(char	**argv, int argc, char **envp)
 t_pipex	*parsing(char **argv, int argc, char **envp)
 {
 	t_pipex	*pipex;
+	int		skip_here_doc;
 
 	pipex = malloc(sizeof(t_pipex));
 	if (pipex == NULL)
 		return (NULL);
-	pipex->cmds = get_cmd_lst(argv, argc, envp);
+	skip_here_doc = ft_strncmp(argv[1], "here_doc", ft_strlen(argv[1])) == 0;
+	pipex->cmds = get_cmd_lst(argv, argc, envp, skip_here_doc);
 	pipex->skip_all_pipe = 0;
-	open_fds(pipex, argv, argc, 0);
+	open_fds(pipex, argv, argc, skip_here_doc);
 	if (pipex->cmds == NULL || pipex->old_fd < 0 || pipex->end_fd < 0)
 	{
 		if (pipex->end_fd > 0)
