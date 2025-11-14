@@ -1,0 +1,143 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   pipex.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ncorrear <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/11/06 15:30:48 by ncorrear          #+#    #+#             */
+/*   Updated: 2025/11/14 09:50:43 by ncorrear         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include <errno.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <string.h>
+#include <wait.h>
+#include "../includes/ft_printf.h"
+#include "../includes/pipex.h"
+
+/**
+ * @brief prepare the input file of the command chain
+ * 
+ * @param argv program arguments
+ * @return int input file descriptor
+ */
+int	file_open_init(char **argv)
+{
+	int	old_wr_pipe;
+
+	old_wr_pipe = open(argv[1], O_RDONLY);
+	if (old_wr_pipe < 0)
+	{
+		ft_dprintf(2, "pipex: %s: %s", argv[1], strerror(errno));
+		old_wr_pipe = open("/dev/null", O_RDONLY);
+		if (old_wr_pipe < 0)
+			ft_dprintf(2, "pipex: %s: %s", "/dev/null", strerror(errno));
+		return (old_wr_pipe);
+	}
+	return (old_wr_pipe);
+}
+
+/**
+ * @brief Wait all child process one by one
+ * 
+ * @param child_i number of child
+ * @param argc number of program's args
+ * @param childs all childs's pid_t
+ * @param last_err Address where write the err of last child
+ */
+void	wait_all(int child_i, int argc, int *childs, int *last_err)
+{
+	while (child_i >= 0)
+	{
+		if (child_i == argc - 4)
+			waitpid(childs[child_i], last_err, 0);
+		else
+			waitpid(childs[child_i], NULL, 0);
+		child_i--;
+	}
+}
+
+/**
+ * @brief Execute a child process properly
+ * 
+ * @param pipex All important data of the program
+ * @param current_cmd command to exec
+ */
+void	child_exec(t_pipex *pipex, t_cmd_lst *current_cmd)
+{
+	dup2(pipex->old_fd, STDIN_FILENO);
+	dup2(pipex->pipfds[WR], STDOUT_FILENO);
+	if (current_cmd->next == NULL)
+		dup2(pipex->end_fd, STDOUT_FILENO);
+	close(pipex->pipfds[WR]);
+	close(pipex->pipfds[RD]);
+	close(pipex->old_fd);
+	close(pipex->end_fd);
+	if (current_cmd->cmd_path != NULL)
+		execve(current_cmd->cmd_path, current_cmd->cmd_argv, pipex->envp);
+	pipex_clear(pipex);
+	exit(127);
+}
+
+/**
+ * @brief Exec all command of the chain
+ * 
+ * @param pipex Important datas of the program
+ * @param childs childs pid_t list
+ * @return int number of child < 0 if fail
+ */
+int	exec_all(t_pipex *pipex, pid_t childs[1024])
+{
+	t_cmd_lst	*current_cmd;
+	int			child_i;
+
+	child_i = -1;
+	current_cmd = pipex->cmds;
+	if (pipex->skip_all_pipe)
+		current_cmd = current_cmd->next;
+	while (current_cmd != NULL)
+	{
+		pipe(pipex->pipfds);
+		childs[++child_i] = fork();
+		if (childs[child_i] == 0)
+			child_exec(pipex, current_cmd);
+		else if (childs[child_i] < 0)
+		{
+			ft_dprintf(2, "pipex: fork: %s", strerror(errno));
+			pipex_clear(pipex);
+			return (childs[child_i]);
+		}
+		close(pipex->old_fd);
+		pipex->old_fd = pipex->pipfds[RD];
+		close(pipex->pipfds[WR]);
+		current_cmd = current_cmd->next;
+	}
+	return (child_i);
+}
+
+int	main(int argc, char **argv, char **envp)
+{
+	pid_t		childs[1024];
+	t_pipex		*pipex;
+	int			child_i;
+	int			last_err;
+
+	if (argc <= 3)
+		exit(1);
+	pipex = parsing(argv, argc, envp);
+	if (pipex == NULL)
+		exit(WEXITSTATUS(127));
+	last_err = 0;
+	child_i = exec_all(pipex, childs);
+	wait_all(child_i, argc - (ft_strncmp(argv[1], "here_doc",
+				ft_strlen(argv[1])) == 0) - pipex->skip_all_pipe, childs,
+		&last_err);
+	if (child_i < 0)
+		exit(WEXITSTATUS(4));
+	close(pipex->old_fd);
+	pipex_clear(pipex);
+	exit(WEXITSTATUS(last_err));
+}

@@ -58,5 +58,6 @@ dkms.conf
 *.pdf
 .DS_Store
 pipex
+bonus
 out
 .vscode/
